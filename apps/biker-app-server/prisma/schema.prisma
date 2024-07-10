@@ -1,0 +1,56 @@
+datasource db {
+  provider = "mongodb"
+  url      = env("DB_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model InsuranceReminder {
+  id           String    @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  reminderDate DateTime?
+  bikers       Biker[]   @relation(name: "BikersOnInsuranceReminder")
+  biker        Biker?    @relation(name: "BikerOnInsuranceReminders", fields: [bikerId], references: [id])
+  bikerId      String?   @db.ObjectId
+}
+
+model Biker {
+  id                  String              @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+  email               String?
+  username            String?
+  voiceChatRoom       VoiceChatRoom?      @relation(name: "BikersOnVoiceChatRoom", fields: [voiceChatRoomId], references: [id])
+  voiceChatRoomId     String?             @db.ObjectId
+  locations           Location[]          @relation(name: "BikerOnLocations")
+  insuranceReminder   InsuranceReminder?  @relation(name: "BikersOnInsuranceReminder", fields: [insuranceReminderId], references: [id])
+  insuranceReminderId String?             @db.ObjectId
+  insuranceReminders  InsuranceReminder[] @relation(name: "BikerOnInsuranceReminders")
+  voiceChatRooms      VoiceChatRoom[]     @relation(name: "BikerOnVoiceChatRooms")
+  location            Location?           @relation(name: "BikersOnLocation", fields: [locationId], references: [id])
+  locationId          String?             @db.ObjectId
+}
+
+model VoiceChatRoom {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  name      String?
+  bikers    Biker[]  @relation(name: "BikersOnVoiceChatRoom")
+  biker     Biker?   @relation(name: "BikerOnVoiceChatRooms", fields: [bikerId], references: [id])
+  bikerId   String?  @db.ObjectId
+}
+
+model Location {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  latitude  Float?
+  longitude Float?
+  biker     Biker?   @relation(name: "BikerOnLocations", fields: [bikerId], references: [id])
+  bikerId   String?  @db.ObjectId
+  bikers    Biker[]  @relation(name: "BikersOnLocation")
+}
